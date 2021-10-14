@@ -38,3 +38,4 @@ Output:
 | 1               |
 +-----------------+
 Explanation: 1 is the only number that appears consecutively for at least three times.
+ 
