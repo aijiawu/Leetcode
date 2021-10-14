@@ -21,18 +21,33 @@ Where Salary < (Select Max(Salary) From Employee)
 
 方法2: 排名Salary，直接列出第二筆資料(利用LIMIT & OFFSET)
 Select Salary AS SecondHighestSalary
-From Employy
+From Employee
 Order By Salary DESC
 Limit 1 Offest 1 
 
+方法3: 利用rank()先排名薪水順序，多欄多列的子查詢結果當資料表用，一定要記得用別名
+Wrong
+Select Salary as SecondHighestSalary
+From
+(Select Salary, RANK() OVER (order by Salary DESC) as rnk 
+From Employee) -> Every derived table must have its own alias
+Where rnk=2 
+
+Correct
+Select Salary as SecondHighestSalary
+From
+(Select Salary, Rank() OVER (order by Salary DESC) as rnk 
+From Employee) as temp
+Where rnk=2 
+
 ***以上並無法避免如果資料只有1筆的時候回傳空值(沒找到資料)，而非Null值***
 
-方法3: 利用子查詢，把排名過Salary的表當作Temp Table，就會回傳Null值 [IFNULL(...,Null)非必須]
+方法4: 利用子查詢，把排名過Salary的表當作Temp Table，就會回傳Null值 [IFNULL(...,Null)非必須]
 Select 
     (Select Salary 
     From Employy
     Order By Salary DESC
-    Limit 1 Offest 3) AS SecondHighestSalary
+    Limit 1 Offest 1) AS SecondHighestSalary
 
 Select 
   IFNULL(
@@ -42,20 +57,12 @@ Select
     Limit 1 Offest 1), 
   Null) AS SecondHighestSalary
 
-方法4: 利用rank()先排名薪水順序，多欄多列的子查詢結果當資料表用，一定要記得用別名
-Wrong
-Select Salary as SecondHighestSalary
+方法4:只要要查找的給Salary，其餘手動給Null值
+Select MAX(CASE WHEN rnk=2 THEN Salary ELSE Null End) as SecondHighestSalary
 From
-(Select Salary, Rank() over (order by Salary DESC) as rnk 
-From Employee) -> Every derived table must have its own alias
-Where rnk=2 
-
-Correct
-Select Salary as SecondHighestSalary
-From
-(Select Salary, Rank() over (order by Salary DESC) as rnk 
+(Select Salary, Rank() OVER (order by Salary DESC) as rnk 
 From Employee) as temp
-Where rnk=2 
+
 
 /*
 依據子查詢的結果，可分為以下三種 : 
