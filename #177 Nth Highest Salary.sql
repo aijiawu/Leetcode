@@ -11,11 +11,22 @@ Each row of this table contains information about the salary of an employee.
 
 Write an SQL query to report the nth highest salary from the Employee table. 
 If there is no nth highest salary, the query should report null.
-找出第N高的薪資
+建立Function程序，每次可以快速查找工資第N高的薪水
 
 -------------------------------------------------------------------------
 
+CREATE OR ALTER FUNCTION getNthHighestSalary(@Nth as INT)
+RETURNS int
+AS
+BEGIN
+  RETURN (
+    Select MAX(CASE WHEN rnk=@Nth THEN Salary ELSE null END) 
+    From (Select Salary, rank() OVER (order by Salary DESC) AS rnk
+          From Employee) as temp
+  )
+END
 
+-------------------------------------------------------------------------
 
 Exmple1:
 Input: 
