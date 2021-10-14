@@ -19,8 +19,10 @@ Return the result table ordered by score in descending order.
 
 -------------------------------------------------------------------
 
-select Score, DENSE_RANK() OVER (Order By Score DESC) as Rank
+select Score, DENSE_RANK() OVER (Order By Score DESC) as [Rank]
 From Scores
+
+***別名與關鍵詞重複時加上[]
 
 -------------------------------------------------------------------
 
