@@ -15,16 +15,17 @@ If there is no nth highest salary, the query should report null.
 
 -------------------------------------------------------------------------
 
-CREATE OR ALTER FUNCTION getNthHighestSalary(@Nth as INT)
-RETURNS int
-AS
+CREATE OR ALTER FUNCTION getNthHighestSalary(@N as INT) 
+RETURNS INT
 BEGIN
   RETURN (
-    Select MAX(CASE WHEN rnk=@Nth THEN Salary ELSE null END) 
-    From (Select Salary, rank() OVER (order by Salary DESC) AS rnk
-          From Employee) as temp
-  )
+    select MAX(CASE WHEN rnk=@N THEN salary ELSE null END)
+    from (select distinct salary, DENSE_RANK() over (order by salary DESC) AS rnk
+          from Employee) as temp
+  );
 END
+
+#不太清楚為什麼不能用ROW_NUMBER()或RANK()
 
 -------------------------------------------------------------------------
 
