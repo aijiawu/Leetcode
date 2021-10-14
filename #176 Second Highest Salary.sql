@@ -19,15 +19,21 @@ Select Max(Salary) AS SecondHighestSalary
 From Employee
 Where Salary < (Select Max(Salary) From Employee)
 
-方法2: 排名Salary，直接列出第二筆資料(利用LIMIT * OFFSET)
+方法2: 排名Salary，直接列出第二筆資料(利用LIMIT & OFFSET)
 Select Salary AS SecondHighestSalary
 From Employy
 Order By Salary DESC
 Limit 1 Offest 1 
 
-***以上並無法避免如果資料只有1筆的時候回傳錯誤值，而非Null值
+***以上並無法避免如果資料只有1筆的時候回傳空值(沒找到資料)，而非Null值***
 
-方法3: 把排名過Salary的表當作Temp Table [IFNULL(...,Null)非必須但這樣比較好記]
+方法3: 利用子查詢，把排名過Salary的表當作Temp Table，就會回傳Null值 [IFNULL(...,Null)非必須]
+Select 
+    (Select Salary 
+    From Employy
+    Order By Salary DESC
+    Limit 1 Offest 3) AS SecondHighestSalary
+
 Select 
   IFNULL(
     (Select Salary 
@@ -35,6 +41,33 @@ Select
     Order By Salary DESC
     Limit 1 Offest 1), 
   Null) AS SecondHighestSalary
+
+方法4: 利用rank()先排名薪水順序，多欄多列的子查詢結果當資料表用，一定要記得用別名
+Wrong
+Select Salary as SecondHighestSalary
+From
+(Select Salary, Rank() over (order by Salary DESC) as rnk 
+From Employee) -> Every derived table must have its own alias
+Where rnk=2 
+
+Correct
+Select Salary as SecondHighestSalary
+From
+(Select Salary, Rank() over (order by Salary DESC) as rnk 
+From Employee) as temp
+Where rnk=2 
+
+/*
+依據子查詢的結果，可分為以下三種 : 
+(1)【多欄多列】
+    必定當『資料表』用，一定要用( )和別名，()與別名皆不能省略
+(2)【單欄多列】
+    可以當『資料表』或『集合』用；
+    若是當集合，一定要用( )，不能給別名
+(3)【單欄單列】scalar value(純量值)
+    可以當『資料表』、『集合』用和『純量值』(scalar value)；
+    若是當純量值，一定要用( )，不能給別名
+*/
 
 -------------------------------------------------------------------------------------
 Example 1:
