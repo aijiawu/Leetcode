@@ -62,16 +62,10 @@ Select
     FETCH NEXT 1 Row Only), 
   Null) AS SecondHighestSalary
   
-select 
+Select 
     ISNULL(
         (Select Salary
          From (Select Distinct Salary, Rank() OVER (order by Salary DESC) as rnk From Employee) as temp
-         Where rnk=2), null) as SecondHighestSalary
-         
-select 
-    ISNULL(
-        (Select Distinct Salary
-         From (Select Salary, Rank() OVER (order by Salary DESC) as rnk From Employee) as temp
          Where rnk=2), null) as SecondHighestSalary
 
 --如果沒有Distinct，會出現錯誤：子查詢傳回不只1個值。這種狀況在子查詢之後有 =、!=、<、<=、>、>= 或是子查詢做為運算式使用時是不允許的。
