@@ -26,27 +26,28 @@ Order By Salary DESC
 OFFSET 1 Row
 FETCH NEXT 1 Row Only
 
-方法3: 利用rank()先排名薪水順序，多欄多列的子查詢結果當資料表用，一定要記得用別名
+方法3: 利用rank()先排名薪水順序，多欄多列的子查詢結果當資料表用，一定要記得用別名 (dense_rank()也可以)
 Correct
 Select Salary as SecondHighestSalary
 From
-(Select Salary, Rank() OVER (order by Salary DESC) as rnk 
-From Employee) as temp
+    (Select Salary, Rank() OVER (order by Salary DESC) as rnk From Employee) as temp
 Where rnk=2 
 
 Wrong
 Select Salary as SecondHighestSalary
-From
-(Select Salary, RANK() OVER (order by Salary DESC) as rnk 
-From Employee) -> Every derived table must have its own alias
+From 
+    (Select Salary, RANK() OVER (order by Salary DESC) as rnk From Employee) -> Every derived table must have its own alias
 Where rnk=2 
 
 ***以上並無法避免如果資料只有1筆的時候回傳空值(沒找到資料)，而非Null值***
+
+-------------------------------------------------------------------------------------
 
 方法4: 利用子查詢，把排名過Salary的表當作Temp Table，就會回傳Null值 [ISNULL(...,Null)非必須]
 Select 
     (Select Salary 
     From Employee
+    Group By Salary       --不確定為何要使用group by，但必須得有
     Order By Salary DESC
     OFFSET 1 Row
     FETCH NEXT 1 Row Only) AS SecondHighestSalary
@@ -55,10 +56,27 @@ Select
   ISNULL(
     (Select Salary 
     From Employee
+    Group By Salary
     Order By Salary DESC
     OFFSET 1 Row
     FETCH NEXT 1 Row Only), 
   Null) AS SecondHighestSalary
+  
+select 
+    ISNULL(
+        (Select Salary
+         From (Select Distinct Salary, Rank() OVER (order by Salary DESC) as rnk From Employee) as temp
+         Where rnk=2), null) as SecondHighestSalary
+         
+select 
+    ISNULL(
+        (Select Distinct Salary
+         From (Select Salary, Rank() OVER (order by Salary DESC) as rnk From Employee) as temp
+         Where rnk=2), null) as SecondHighestSalary
+
+--如果沒有Distinct，會出現錯誤：子查詢傳回不只1個值。這種狀況在子查詢之後有 =、!=、<、<=、>、>= 或是子查詢做為運算式使用時是不允許的。
+
+-------------------------------------------------------------------------------------
 
 方法5:只有要查找的給Salary，其餘手動給Null值
 Select MAX(CASE WHEN rnk=2 THEN Salary ELSE Null End) as SecondHighestSalary
