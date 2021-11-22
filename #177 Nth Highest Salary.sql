@@ -13,19 +13,45 @@ Write an SQL query to report the nth highest salary from the Employee table.
 If there is no nth highest salary, the query should report null.
 建立Function程序，每次可以快速查找工資第N高的薪水
 
+--RANK():       1,1,1,4,4,6
+--DENSE_RANK(): 1,1,1,2,2,3 (最好用Dense_rank)
+
 -------------------------------------------------------------------------
 
-CREATE OR ALTER FUNCTION getNthHighestSalary(@N as INT) 
-RETURNS INT
+CREATE FUNCTION getNthHighestSalary(@N INT) RETURNS INT AS
 BEGIN
-  RETURN (
-    select MAX(CASE WHEN rnk=@N THEN salary ELSE null END)
-    from (select distinct salary, DENSE_RANK() over (order by salary DESC) AS rnk
-          from Employee) as temp
-  );
+    RETURN (
+        Select 
+            ISNULL(
+             (Select Salary
+             From Employee
+             Group By Salary
+             Order By Salary DESC
+             OFFSET @N-1 Row
+             FETCH NEXT 1 ROW ONLY), NULL) as NthHighestSalary       
+    );
 END
 
-#不太清楚為什麼不能用ROW_NUMBER()或RANK()
+
+CREATE FUNCTION getNthHighestSalary(@N INT) RETURNS INT AS
+BEGIN
+RETURN (
+    Select ISNULL(Salary,NULL) as NthHighestSalary
+    FROM (Select Distinct Salary, dense_rank() over (order by Salary desc) as rnk from Employee) as temp
+    where temp.rnk=@N
+);
+END
+--這種寫法在176.題不可行。
+
+CREATE FUNCTION getNthHighestSalary(@N INT) RETURNS INT AS
+BEGIN
+RETURN (
+    Select ISNULL(
+        (Select Salary
+         From (Select Distinct Salary, dense_rank() OVER (order by Salary DESC) as rnk From Employee) as temp
+         Where rnk=@N), null) as SecondHighestSalary
+);
+END
 
 -------------------------------------------------------------------------
 
@@ -62,3 +88,5 @@ Output:
 +------------------------+
 | Null                   |
 +------------------------+
+
+
