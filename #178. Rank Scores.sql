@@ -12,8 +12,8 @@ Each row of this table contains the score of a game. Score is a floating point v
 Write an SQL query to rank the scores. The ranking should be calculated according to the following rules:
 
 The scores should be ranked from the highest to the lowest.
-If there is a tie between two scores, both should have the same ranking.
-After a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no holes between ranks.
+If there is a tie between two scores, both should have the same ranking. 
+After a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no holes between ranks. --dense_rank
 Return the result table ordered by score in descending order.
 
 
