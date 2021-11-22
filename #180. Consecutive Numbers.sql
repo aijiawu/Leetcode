@@ -13,8 +13,11 @@ Return the result table in any order.
 找出連續出現三次以上的數字
 
 ------------------------------------------------------------------------------
+--當成三張表JOIN，，1=2 & 2=3成立時，就代表連續三次數
 
-
+Select Distinct a.num as ConsecutiveNums
+From Logs a INNER JOIN Logs b ON (a.id+1=b.id) INNER JOIN Logs c ON (a.id+2=c.id)
+Where a.num=b.num AND b.num=c.num
 
 ------------------------------------------------------------------------------
 
