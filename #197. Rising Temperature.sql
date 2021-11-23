@@ -16,7 +16,7 @@ Return the result table in any order.
 
 -------------------------------------------------------------------------------------
 
---self-join, w1 as date from yesterday, w2 as date from today
+-- self-join, w1 as date from yesterday, w2 as date from today
 Select w2.id
 From Weather w1 INNER JOIN Weather w2 ON (Datediff(day,w1.recordDate,w2.recordDate)=1)
 Where w2.temperature > w1.temperature
