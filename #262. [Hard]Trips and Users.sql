@@ -42,6 +42,12 @@ From Trips t INNER JOIN Users u ON (t.client_id=u.users_id) AND u.banned='No' IN
 Where t.request_at BETWEEN '2013-10-01' AND '2013-10-03'  
 Group By t.request_at
 
+Select t.request_at as Day, CAST(
+    SUM(CASE WHEN status LIKE 'cancelled%' THEN 1.0 ELSE 0.0 END)/count(*) as DECIMAL (5,2)) as [Cancellation Rate]
+From Trips t INNER JOIN Users u ON (t.client_id=u.users_id) INNER JOIN Users u2 ON (t.driver_id=u2.users_id) 
+Where t.request_at BETWEEN '2013-10-01' AND '2013-10-03' AND u.banned='No' AND u2.banned='No'
+Group By t.request_at
+
 --second method
 Select request_at as Day, CAST( 
         SUM(CASE WHEN Status like 'cancelled%' THEN 1.0 ELSE 0.0 END)/count(*)
